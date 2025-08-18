@@ -1,4 +1,4 @@
-#include "src/engines/BraveEngine.h"
+#include "webSearch/BraveEngine.h"
 
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
@@ -47,7 +47,7 @@ std::vector<UrlResult> BraveEngine::query(const std::string& q,
 
     std::string buf;
     curl_easy_setopt(c, CURLOPT_URL, url.str().c_str());
-    curl_easy_setopt(c, CURLOPT_TIMEOUT_MS, 6000);
+    curl_easy_setopt(c, CURLOPT_TIMEOUT_MS, 300000);
     curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(c, CURLOPT_WRITEDATA, &buf);
     struct curl_slist* hdrs = nullptr;

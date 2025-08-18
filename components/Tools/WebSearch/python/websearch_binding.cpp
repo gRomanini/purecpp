@@ -1,41 +1,19 @@
-/**
- *  Bindings ― Pybind11
- *  -------------------
- *  Este arquivo injeta o sub-módulo **WebSearch** dentro do *mesmo*
- *  `RagPUREAI.so`.  Ele expõe a classe “Python-first” `WebSearchManager`,
- *  que faz wrap de `JobManager` e devolve uma lista de dicts
- *  `{url, rank, markdown}`.
- *
- *  Uso (Python):
- *
- *  >>> import RagPUREAI as rp
- *  >>> mgr  = rp.WebSearchManager(engine="brave", workers=4)
- *  >>> docs = mgr.search("gpu news august 2025", k=3)
- *  >>> print(docs[0]["markdown"][:200])
- *
- *  Integração (CMake):
- *    # ➊ adicionar este .cpp a RagPUREAI_BINDING_SRCS
- *    # ➋ em binding.cpp chamar   bind_websearch(m);
- */
-
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "include/IWebSearch.h"
-#include "include/ICrawler.h"
-#include "include/ICleaner.h"
-#include "src/manager/JobManager.h"
-#include "src/engines/BraveEngine.h"
-#include "src/crawler/CurlCrawler.h"
-#include "src/cleaner/HtmlCleaner.h"
+#include "webSearch/IWebSearch.h"
+#include "webSearch/ICrawler.h"
+#include "webSearch/ICleaner.h"
+#include "webSearch/JobManager.h"
+#include "webSearch/BraveEngine.h"
+#include "webSearch/CurlCrawler.h"
+#include "webSearch/HtmlCleaner.h"
 
 namespace py = pybind11;
 using namespace purecpp::websearch;
+using namespace pybind11::literals; 
 
-/* ------------------------------------------------------------------ */
-/* Helper: SearchJob → list(dict)                                     */
-/* ------------------------------------------------------------------ */
 static py::list job_to_py(const SearchJob& job)
 {
     py::list out;
@@ -49,9 +27,6 @@ static py::list job_to_py(const SearchJob& job)
     return out;
 }
 
-/* ------------------------------------------------------------------ */
-/* Python façade                                                      */
-/* ------------------------------------------------------------------ */
 class PyWebSearchManager {
 public:
     PyWebSearchManager(const std::string& engine,
@@ -98,12 +73,8 @@ private:
     std::unique_ptr<JobManager>  mgr_;
 };
 
-/* ------------------------------------------------------------------ */
-/* Public binder – chamado por binding.cpp                            */
-/* ------------------------------------------------------------------ */
 void bind_websearch(py::module_& m)
 {
-    /* enum de progresso */
     py::enum_<JobStage>(m, "JobStage")
         .value("Started",    JobStage::Started)
         .value("UrlFetched", JobStage::UrlFetched)
@@ -111,12 +82,10 @@ void bind_websearch(py::module_& m)
         .value("Done",       JobStage::Done)
         .value("Error",      JobStage::Error);
 
-    /* struct UrlResult */
     py::class_<UrlResult>(m, "UrlResult")
         .def_readonly("url",  &UrlResult::url)
         .def_readonly("rank", &UrlResult::rank);
 
-    /* fachada principal */
     py::class_<PyWebSearchManager>(m, "WebSearchManager")
         .def(py::init<const std::string&, std::size_t>(),
              py::arg("engine")  = "brave",

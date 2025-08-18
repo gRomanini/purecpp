@@ -1,5 +1,5 @@
 #pragma once
-#include "include/ICrawler.h"
+#include "webSearch/ICrawler.h"
 #include <curl/curl.h>
 
 namespace purecpp::websearch {

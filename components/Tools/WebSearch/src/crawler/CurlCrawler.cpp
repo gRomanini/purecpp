@@ -1,4 +1,4 @@
-#include "src/crawler/CurlCrawler.h"
+#include "webSearch/CurlCrawler.h"
 #include <stdexcept>
 #include <vector>
 
@@ -43,7 +43,7 @@ std::string CurlCrawler::fetch(const std::string& url,
     curl_easy_setopt(easy, CURLOPT_ACCEPT_ENCODING, "");          // any
     curl_easy_setopt(easy, CURLOPT_USERAGENT,
                      "PureCPP-WebSearch/1.0 (+https://pure.ai)");
-    curl_easy_setopt(easy, CURLOPT_TIMEOUT_MS, timeout_ms);
+    curl_easy_setopt(easy, CURLOPT_TIMEOUT_MS, timeout_ms > 0 ? timeout_ms : 15000);
     curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(easy, CURLOPT_WRITEDATA, &buffer);
 

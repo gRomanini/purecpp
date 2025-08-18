@@ -1,9 +1,9 @@
 #pragma once
-#include "include/IWebSearch.h"
-#include "include/ICrawler.h"
-#include "include/ICleaner.h"
-#include "include/IEmitter.h"
-#include "include/ThreadPool.h"
+#include "webSearch/IWebSearch.h"
+#include "webSearch/ICrawler.h"
+#include "webSearch/ICleaner.h"
+#include "webSearch/IEmitter.h"
+#include "webSearch/ThreadPool.h"
 
 #include <future>
 #include <memory>

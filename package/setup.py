@@ -25,7 +25,7 @@ elif sys.platform.startswith("linux"):
 
 setup(
     name="purecpp",
-    version="0.0.18",
+    version="0.0.22",
     description="All-in-one solution for building Retrieval-Augmented Generation (RAG) pipelines",
     author="PureAI",
     author_email="contato@pureai.com.br",

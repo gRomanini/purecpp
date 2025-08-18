@@ -38,6 +38,7 @@ find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
 find_package(onnxruntime REQUIRED)
 find_package(redis++ REQUIRED)
+find_package(gumbo-parser REQUIRED) 
 
 execute_process(
     COMMAND "${Python3_EXECUTABLE}" -c
@@ -93,14 +94,17 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Sources
 file(GLOB_RECURSE VDB_SRCS ${CMAKE_SOURCE_DIR}/components/VectorDatabase/src/*.cpp)
+file(GLOB_RECURSE WEBSEARCH_SRCS ${CMAKE_SOURCE_DIR}/components/Tools/WebSearch/src/*.cpp)
 
 set(RagPUREAI_BINDING_SRCS
     ${CMAKE_SOURCE_DIR}/src/binding.cpp
     ${CMAKE_SOURCE_DIR}/components/VectorDatabase/python/binding_vectordb.cpp
+    ${CMAKE_SOURCE_DIR}/components/Tools/WebSearch/python/websearch_binding.cpp
 )
 
 set(RagPUREAI_IMPL_SRCS
     ${VDB_SRCS}
+    ${WEBSEARCH_SRCS}
     ${CMAKE_SOURCE_DIR}/libs/StringUtils/StringUtils.cpp
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs/CommonStructs.cpp
     ${CMAKE_SOURCE_DIR}/components/DataLoader/BaseLoader.cpp
@@ -148,6 +152,7 @@ target_include_directories(RagPUREAILib PUBLIC
     ${CMAKE_SOURCE_DIR}/components/Chat/Message
 
     ${CMAKE_SOURCE_DIR}/components/VectorDatabase/include
+    ${CMAKE_SOURCE_DIR}/components/Tools/WebSearch/include
 
     ${CMAKE_SOURCE_DIR}/libs/RagException
     ${CMAKE_SOURCE_DIR}/libs/ThreadSafeQueue
@@ -177,6 +182,7 @@ target_link_libraries(RagPUREAILib PUBLIC
     onnxruntime::onnxruntime
     tokenizers_cpp
     protobuf::libprotobuf
+    gumbo-parser::gumbo-parser
     CURL::libcurl
     ${Python3_LIBRARIES}
     ${TORCH_LIBRARIES}
@@ -185,26 +191,3 @@ target_link_libraries(RagPUREAILib PUBLIC
 # Binding with Pybind11
 pybind11_add_module(RagPUREAI ${RagPUREAI_BINDING_SRCS})
 target_link_libraries(RagPUREAI PRIVATE RagPUREAILib)
-
-# vectordb
-pybind11_add_module(vectordb components/VectorDatabase/python/_vectordb.cpp)
-target_link_libraries(vectordb PRIVATE
-    -Wl,--whole-archive
-    VectorDatabase
-    -Wl,--no-whole-archive
-)
-
-# Disables LTO/IPO in the module to avoid ODR/refcount problems.
-
-set_property(TARGET vectordb PROPERTY INTERPROCEDURAL_OPTIMIZATION FALSE)
-target_compile_options(vectordb PRIVATE -fno-lto)
-target_link_options(vectordb PRIVATE -fno-lto)
-
-# .so output
-set_target_properties(vectordb PROPERTIES
-    OUTPUT_NAME "vectordb"
-    LIBRARY_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
-    ARCHIVE_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
-    RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
-)
-

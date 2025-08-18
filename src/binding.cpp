@@ -1326,9 +1326,6 @@ void bind_EmbeddingOpenAI(py::module &m)
         )doc");
 }
 
-// VectorDabase
-void bind_VectorDB(pybind11::module_ &);
-
 // Trampoline class for BaseMessage
 class PyBaseMessage : public purecpp::chat::BaseMessage {
 public:
@@ -1377,6 +1374,10 @@ void bind_ChatClasses(py::module &m) {
         .def("add_benchmark_messages_omp", &purecpp::chat::ChatHistory::add_benchmark_messages_omp, py::arg("num_messages"));
 }
 
+// VectorDabase
+void bind_VectorDB(pybind11::module_ &);
+void bind_websearch(pybind11::module_ &);
+
 //--------------------------------------------------------------------------
 // Main module
 //--------------------------------------------------------------------------
@@ -1419,4 +1420,7 @@ PYBIND11_MODULE(RagPUREAI, m)
 
     py::module_ vectorDB = m.def_submodule("vectorDB", "Bindings for vector database");
     bind_VectorDB(vectorDB);
+
+    py::module_ webSearch = m.def_submodule("webSearch", "Bindings for vector database");
+    bind_websearch(webSearch);
 }

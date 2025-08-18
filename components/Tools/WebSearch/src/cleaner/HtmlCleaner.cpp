@@ -1,4 +1,4 @@
-#include "src/cleaner/HtmlCleaner.h"
+#include "webSearch/HtmlCleaner.h"
 #include <gumbo.h> // vcpkg: gumbo
 #include <sstream>
 #include <regex>
@@ -43,21 +43,19 @@ static std::string html_to_md(const std::string& txt)
     for (int h = 6; h >= 1; --h) {
         std::string open = "<h" + std::to_string(h) + ">";
         std::string clos = "</h" + std::to_string(h) + ">";
-        std::regex rx{open + R"(([\s\S]*?))" + clos, std::regex::icase};
-        out              = std::regex_replace(out, rx,
-                             std::string(h, '#') + " $1\n");
+        std::regex rx{open + R"((.*?)?)" + clos, std::regex::icase};
+        out = std::regex_replace(out, rx, std::string(h, '#') + " $1\n");
     }
 
     /* links */
     {
-        // CORREÇÃO: A inicialização da regex foi consolidada em uma única linha.
-        std::regex rx{R"(<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)</a>)", std::regex::icase};
+        std::regex rx("<a [^>]*href=\\\"([^\"]+)\\\"[^>]*>(.*?)</a>", std::regex::icase);
         out = std::regex_replace(out, rx, "[$2]($1)");
     }
 
     /* unordered list → “* item” */
     {
-        std::regex li{R"(<li[^>]*>([\s\S]*?)</li>)", std::regex::icase};
+        std::regex li{R"(<li[^>]*>(.*?)</li>)", std::regex::icase};
         out = std::regex_replace(out, li, "* $1\n");
         std::regex ul{R"(<\/?ul[^>]*>)", std::regex::icase};
         out = std::regex_replace(out, ul, "");
@@ -65,8 +63,7 @@ static std::string html_to_md(const std::string& txt)
 
     /* code span */
     {
-        std::regex code{R"(<code[^>]*>([\s\S]*?)</code>)",
-                        std::regex::icase};
+        std::regex code{R"(<code[^>]*>(.*?)</code>)", std::regex::icase};
         out = std::regex_replace(out, code, "`$1`");
     }
 
